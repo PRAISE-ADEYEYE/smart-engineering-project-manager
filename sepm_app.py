@@ -4,7 +4,6 @@ import os
 import time
 from datetime import datetime
 from statistics import LinearRegression
-from docx import Document
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -36,11 +35,11 @@ menu = st.sidebar.selectbox("Navigate",
                              "📘 Engineering Glossary", "📎 Notes & Docs", "🔁 Version Control", "🛠️ Unit Converter",
                              "📦 Inventory Tracker", "🎯 Goal Tracker", "🧪 Test Log", "🕒 Time Tracker",
                              "🖼️ CAD Viewer", "🔍 Error Log Analyzer", "📡 Sensor Monitor", "🧰 Tool Scheduler",
-                             "Sound metre pro", "Engineering calculator", "Notes summarizer", "Engineering videos"])
+                             "🎵📏 Sound metre pro", "📝✨ Notes summarizer", "🎥🔧 Engineering videos"])
 
 
 # HOME
-def ARIMA(series, order):
+def ARIMA():
     pass
 
 
@@ -436,7 +435,7 @@ elif menu == "📈 Data Analyzer":
                 df = df.sort_values(by=date_col)
                 series = df.set_index(date_col)[value_col].dropna()
                 try:
-                    model = ARIMA(series, order=(2, 1, 2))
+                    model = ARIMA()
                     results = model.fit()
                     forecast = results.forecast(steps=10)
                     st.write("**10-Step Forecast:**")
@@ -511,7 +510,8 @@ elif menu == "📋 BOM Manager":
 elif menu == "🧠 Calculator":
     st.subheader("🧠 Advanced Engineering Calculator")
     tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
-        ["🧮 Symbolic Math", "🔢 Numeric Solver", "📐 Unit Conversion", "🧾 Matrix Tools", "📊 Plot Functions", "📚 Engineering Constants"]
+        ["🧮 Symbolic Math", "🔢 Numeric Solver", "📐 Unit Conversion", "🧾 Matrix Tools", "📊 Plot Functions",
+         "📚 Engineering Constants"]
     )
 
     # Tab 1: Symbolic Math
@@ -550,6 +550,7 @@ elif menu == "🧠 Calculator":
                 f_expr = sp.sympify(lhs) - sp.sympify(rhs)
                 f = sp.lambdify(x, f_expr)
                 from scipy.optimize import fsolve
+
                 sol = fsolve(f, guess)
                 st.success(f"Approximate solution: {sol[0]}")
             except Exception as e:
@@ -559,6 +560,7 @@ elif menu == "🧠 Calculator":
     with tab3:
         st.markdown("### 📐 Unit Converter")
         from pint import UnitRegistry
+
         ureg = UnitRegistry()
         input_qty = st.text_input("Enter quantity with unit (e.g., 10 meter)")
         target_unit = st.text_input("Convert to (e.g., feet)")
@@ -712,11 +714,6 @@ elif menu == "📎 Notes & Docs":
             content = uploaded_file.read().decode("utf-8")
             st.text_area("📄 File Content", content, height=300)
 
-        elif file_type == "docx":
-            doc = docx.Document(uploaded_file)
-            full_text = "\n".join([para.text for para in doc.paragraphs])
-            st.text_area("📝 Document Content", full_text, height=300)
-
         elif file_type == "csv":
             df = pd.read_csv(uploaded_file)
             st.dataframe(df)
@@ -739,6 +736,7 @@ elif menu == "📎 Notes & Docs":
             elif file_format == "PDF":
                 # Generate a temporary PDF
                 from fpdf import FPDF
+
                 pdf = FPDF()
                 pdf.add_page()
                 pdf.set_font("Arial", size=12)
@@ -769,6 +767,7 @@ elif menu == "📎 Notes & Docs":
     if notes:
         from wordcloud import WordCloud
         import matplotlib.pyplot as plt
+
         wordcloud = WordCloud(background_color='white', width=800, height=300).generate(notes)
         fig, ax = plt.subplots()
         ax.imshow(wordcloud, interpolation='bilinear')
@@ -804,7 +803,7 @@ elif menu == "🔁 Version Control":
     if st.session_state.versions:
         st.markdown("### 🗂 Version History")
         for idx, version in enumerate(reversed(st.session_state.versions), 1):
-            with st.expander(f"📄 Version {len(st.session_state.versions)-idx+1} - {version['note']}"):
+            with st.expander(f"📄 Version {len(st.session_state.versions) - idx + 1} - {version['note']}"):
                 st.write(f"🕒 Timestamp: `{version['timestamp']}`")
                 st.write(f"📎 File: `{version['filename']}`")
                 if version['filename'].endswith(".txt"):
@@ -815,16 +814,14 @@ elif menu == "🔁 Version Control":
                     st.dataframe(df)
                 elif version['filename'].endswith(".pdf"):
                     base64_pdf = base64.b64encode(version["data"]).decode("utf-8")
-                    st.markdown(f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="400px"></iframe>', unsafe_allow_html=True)
-                elif version['filename'].endswith(".docx"):
-                    doc = docx.Document(io.BytesIO(version["data"]))
-                    text = "\n".join([p.text for p in doc.paragraphs])
-                    st.text_area("DOCX Content", text, height=200)
+                    st.markdown(
+                        f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="400px"></iframe>',
+                        unsafe_allow_html=True)
 
     # Optional: Compare Two Versions
     if len(st.session_state.versions) >= 2:
         st.markdown("### 🔍 Compare Two Versions")
-        file_options = [f"{i+1}: {v['note']}" for i, v in enumerate(st.session_state.versions)]
+        file_options = [f"{i + 1}: {v['note']}" for i, v in enumerate(st.session_state.versions)]
         version1 = st.selectbox("Select First Version", options=file_options, index=0)
         version2 = st.selectbox("Select Second Version", options=file_options, index=1)
 
@@ -838,6 +835,7 @@ elif menu == "🔁 Version Control":
             diff1 = data1.decode()
             diff2 = data2.decode()
             from difflib import ndiff
+
             diff_result = '\n'.join(ndiff(diff1.splitlines(), diff2.splitlines()))
             st.code(diff_result, language="diff")
         except:
