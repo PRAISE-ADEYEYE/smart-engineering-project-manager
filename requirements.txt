@@ -12,3 +12,4 @@ PyPDF2
 pdfplumber
 scikit-learn
 seaborn
+docx
