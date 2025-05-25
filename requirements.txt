@@ -1,13 +1,14 @@
 streamlit
-numpy
 pandas
+numpy
 matplotlib
-plotly
-scikit-learn
 sympy
+scipy
+plotly
+openai
+python-docx
+gensim
 PyPDF2
-sumy            # For text summarization instead of gensim.summarization
-transformers    # Optional: AI-powered summarization (huggingface)
-torch           # Required by transformers
-openai          # For AI assistant integration
-requests        # For web requests (if needed)
+pdfplumber
+scikit-learn
+seaborn
