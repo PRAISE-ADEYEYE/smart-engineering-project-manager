@@ -4,7 +4,7 @@ import os
 import time
 from datetime import datetime
 from statistics import LinearRegression
-import docx
+from docx import Document
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
