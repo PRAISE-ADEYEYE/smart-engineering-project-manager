@@ -1,7 +1,13 @@
 streamlit
-pandas
 numpy
+pandas
 matplotlib
+plotly
+scikit-learn
 sympy
-python-dotenv
-openai
+PyPDF2
+sumy            # For text summarization instead of gensim.summarization
+transformers    # Optional: AI-powered summarization (huggingface)
+torch           # Required by transformers
+openai          # For AI assistant integration
+requests        # For web requests (if needed)
