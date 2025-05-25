@@ -6,10 +6,8 @@ sympy
 scipy
 plotly
 openai
-python-docx
 gensim
 PyPDF2
 pdfplumber
 scikit-learn
 seaborn
-docx
