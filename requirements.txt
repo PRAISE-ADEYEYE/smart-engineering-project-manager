@@ -8,3 +8,4 @@ jax
 openai
 pygments
 scikit-learn
+pint
