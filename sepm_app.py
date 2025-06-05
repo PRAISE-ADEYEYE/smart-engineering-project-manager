@@ -58,7 +58,7 @@ if menu == "🏠 Home":
     with col2:
         st.metric("📎 Files Uploaded", len(st.session_state.uploaded_files))
     with col3:
-        st.metric("⚙️ Tools Used", 7)
+        st.metric("⚙️ Tools Used", 24)
     st.info("Use the sidebar to upload tasks, calculate equations, visualize reports, and get help from AI.")
 
 
