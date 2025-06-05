@@ -844,7 +844,7 @@ elif menu == "🔁 Version Control":
 st.markdown("---")
 st.markdown("""
   <center>
-      🔧 Developed with passion by **Praise Adeyeye**  
+      🔧 Developed by **Praise Adeyeye**  
       🧠 _"Engineering isn’t just equations — it’s imagination made real."_ 💡  
       <br>
       © 2025 Praise Adeyeye. All rights reserved. 🚀
