@@ -9,3 +9,6 @@ openai
 pygments
 scikit-learn
 pint
+streamlit_option_menu
+python-dotenv
+requests
