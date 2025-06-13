@@ -6,6 +6,7 @@ from datetime import datetime
 from statistics import LinearRegression
 import matplotlib.pyplot as plt
 import numpy as np
+import openai
 import pandas as pd
 import plotly.express as px
 import streamlit as st
@@ -16,6 +17,9 @@ from pygments.lexers import go
 from sklearn.cluster import KMeans
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
+import datetime
+datetime.datetime.now().isoformat()
+
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
@@ -44,24 +48,94 @@ def ARIMA():
 
 
 if menu == "🏠 Home":
-    placeholder = st.empty()
-    message = "### Welcome to SEPM — Your All-in-One Engineering Workflow App!"
-    typed_message = ""
-    for char in message:
-        typed_message += char
-        placeholder.markdown(typed_message)
-        time.sleep(0.05)
+    # ----------  PAGE CONFIG & HERO BANNER  ----------
+    st.markdown(
+        """
+        <style>
+        /* Center hero text */
+        h1,h3,h4 {text-align:center; color:#fefefefe;}
+        /* Divider line tweak */
+        hr {border-top: 1px solid rgba(0,255,255,0.3);}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("📂 Active Projects", len(st.session_state.tasks))
-    with col2:
-        st.metric("📎 Files Uploaded", len(st.session_state.uploaded_files))
-    with col3:
-        st.metric("⚙️ Tools Used", 24)
-    st.info("Use the sidebar to upload tasks, calculate equations, visualize reports, and get help from AI.")
+    # ----------  HERO TYPE‑WRITER  ----------
+    hero1 = st.empty()
+    msg1 = "### 🚀 **Welcome to SEPM — Your All‑in‑One Engineering Workflow Hub!**"
+    typed = ""
+    for ch in msg1:
+        typed += ch
+        hero1.markdown(typed)
+        time.sleep(0.03)
 
+    hero2 = st.empty()
+    msg2 = "##### 👋 Hey Engineer, here’s your live mission control panel:"
+    typed = ""
+    for ch in msg2:
+        typed += ch
+        hero2.markdown(typed)
+        time.sleep(0.03)
 
+    # ----------  TOP‑LEVEL KPIs  ----------
+    kpi1, kpi2, kpi3 = st.columns(3)
+    kpi1.metric("📂 Active Projects", len(st.session_state.tasks))
+    kpi2.metric("📎 Files Uploaded", len(st.session_state.uploaded_files))
+    kpi3.metric("🛠️ Modules Available", 24)
+
+    st.markdown("---")
+
+    # ----------  MINI DASHBOARD  ----------
+    left, right = st.columns(2)
+
+    with left:
+        st.subheader("📊 Task Status Snapshot")
+        status_data = pd.DataFrame({
+            "Status": ["Completed", "Pending"],
+            "Count": [
+                sum(t["status"] == "Completed" for t in st.session_state.tasks),
+                sum(t["status"] != "Completed" for t in st.session_state.tasks)
+            ]
+        })
+        fig_status = px.pie(
+            status_data,
+            names="Status",
+            values="Count",
+            hole=0.45,
+            color_discrete_sequence=["#00d1b2", "#ffdd57"],
+        )
+        fig_status.update_traces(textposition='inside', textinfo='percent+label')
+        fig_status.update_layout(margin=dict(l=0, r=0, t=20, b=0))
+        st.plotly_chart(fig_status, use_container_width=True)
+
+    with right:
+        st.subheader("📈 Weekly Productivity")
+        prod_df = pd.DataFrame({
+            "Day": [f"Day {i}" for i in range(1, 8)],
+            "Hours": np.random.randint(2, 9, 7)
+        })
+        fig_line = px.area(
+            prod_df, x="Day", y="Hours",
+            markers=True,
+            color_discrete_sequence=["#3273dc"]
+        )
+        fig_line.update_layout(yaxis_title="Hours Worked",
+                               xaxis_title=None,
+                               margin=dict(l=0, r=0, t=20, b=0))
+        st.plotly_chart(fig_line, use_container_width=True)
+
+    st.markdown("---")
+
+    st.success(
+        "💡 **Pro Tip:** use the sidebar to explore goal tracking, inventory tools, sensor monitors, AI summarization, and much more!"
+    )
+    st.markdown(
+        "<div style='text-align:center; color:#fefefe; font-style:italic;'>"
+        "Stay consistent, stay smart — SEPM keeps you building like a pro 🧠✨"
+        "</div>",
+        unsafe_allow_html=True
+    )
 # PROJECT MANAGER
 elif menu == "📁 Project Manager":
     st.subheader("📁 Project Manager")
@@ -94,7 +168,6 @@ elif menu == "📁 Project Manager":
         st.markdown("### 📋 Current Task List")
 
         task_df = pd.DataFrame(st.session_state.tasks)
-
 
         # Color-code status
         def highlight_status(val):
@@ -566,7 +639,7 @@ elif menu == "🧠 Calculator":
         target_unit = st.text_input("Convert to (e.g., feet)")
         if st.button("Convert"):
             try:
-                q = ureg(input_qty)
+                q = ureg
                 converted = q.to(target_unit)
                 st.success(f"{q} = {converted}")
             except Exception as e:
@@ -840,6 +913,221 @@ elif menu == "🔁 Version Control":
             st.code(diff_result, language="diff")
         except:
             st.warning("⚠️ Cannot compare these files. Only text-based file comparisons are supported.")
+
+elif menu == "🛠️ Unit Converter":
+    st.subheader("🛠️ Engineering Unit Converter")
+
+    categories = {
+        "Length": {"mm": 0.001, "cm": 0.01, "m": 1.0, "in": 0.0254, "ft": 0.3048},
+        "Force": {"N": 1.0, "kN": 1000, "lbf": 4.44822},
+        "Temperature": {"°C": "celsius", "°F": "fahrenheit", "K": "kelvin"},
+        "Pressure": {"Pa": 1.0, "kPa": 1000, "MPa": 1e6, "psi": 6894.76, "atm": 101325}
+    }
+
+    category = st.selectbox("Choose category", list(categories.keys()))
+
+    if category != "Temperature":
+        units = list(categories[category].keys())
+        input_val = st.number_input("Enter value", format="%0.5f")
+        from_unit = st.selectbox("From", units)
+        to_unit = st.selectbox("To", units)
+        if st.button("Convert"):
+            result = input_val * categories[category][from_unit] / categories[category][to_unit]
+            st.success(f"{input_val} {from_unit} = {result:.5f} {to_unit}")
+    else:
+        temp_input = st.number_input("Enter temperature")
+        from_unit = st.selectbox("From", ["°C", "°F", "K"])
+        to_unit = st.selectbox("To", ["°C", "°F", "K"])
+        def convert_temp(value, from_u, to_u):
+            if from_u == to_u: return value
+            if from_u == "°C":
+                if to_u == "°F": return value * 9/5 + 32
+                if to_u == "K": return value + 273.15
+            elif from_u == "°F":
+                if to_u == "°C": return (value - 32) * 5/9
+                if to_u == "K": return (value - 32) * 5/9 + 273.15
+            elif from_u == "K":
+                if to_u == "°C": return value - 273.15
+                if to_u == "°F": return (value - 273.15) * 9/5 + 32
+        if st.button("Convert Temperature"):
+            converted = convert_temp(temp_input, from_unit, to_unit)
+            st.success(f"{temp_input} {from_unit} = {converted:.2f} {to_unit}")
+
+elif menu == "📦 Inventory Tracker":
+    st.subheader("📦 Engineering Inventory Tracker")
+
+    if 'inventory' not in st.session_state:
+        st.session_state.inventory = []
+
+    with st.form("add_inventory"):
+        name = st.text_input("Item Name")
+        quantity = st.number_input("Quantity", min_value=0, step=1)
+        location = st.text_input("Location (e.g., Store Room A)")
+        category = st.selectbox("Category", ["Mechanical", "Electrical", "Thermal", "Other"])
+        add_item = st.form_submit_button("Add Item")
+        if add_item and name:
+            st.session_state.inventory.append({
+                "Item": name, "Quantity": quantity, "Location": location,
+                "Category": category, "Last Updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            })
+            st.success("Item added!")
+
+    if st.session_state.inventory:
+        df = pd.DataFrame(st.session_state.inventory)
+        st.dataframe(df)
+
+        st.markdown("### 🔎 Filter/Search Inventory")
+        search_term = st.text_input("Search by name/category:")
+        if search_term:
+            filtered = df[df.apply(lambda row: search_term.lower() in row.astype(str).str.lower().values, axis=1)]
+            st.dataframe(filtered)
+
+        if st.button("📤 Export Inventory to CSV"):
+            csv = df.to_csv(index=False).encode()
+            st.download_button("Download CSV", csv, "inventory_export.csv", "text/csv")
+elif menu == "🎯 Goal Tracker":
+    st.subheader("🎯 Engineering Goal Tracker")
+
+    if "goals" not in st.session_state:
+        st.session_state.goals = []
+
+    with st.form("add_goal_form"):
+        goal = st.text_input("Enter your goal")
+        deadline = st.date_input("Deadline", datetime.date.today())
+        add_goal = st.form_submit_button("Add Goal")
+        if add_goal and goal:
+            st.session_state.goals.append({
+                "Goal": goal,
+                "Deadline": deadline.strftime("%Y-%m-%d"),
+                "Status": "Pending"
+            })
+            st.success("Goal added successfully!")
+
+    if st.session_state.goals:
+        df_goals = pd.DataFrame(st.session_state.goals)
+        st.dataframe(df_goals)
+
+        completed = st.multiselect("Mark Completed Goals", df_goals["Goal"])
+        for i, g in enumerate(st.session_state.goals):
+            if g["Goal"] in completed:
+                st.session_state.goals[i]["Status"] = "Completed"
+elif menu == "🧪 Test Log":
+    st.subheader("🧪 Engineering Test Logbook")
+
+    if "test_logs" not in st.session_state:
+        st.session_state.test_logs = []
+
+    with st.form("test_log_form"):
+        test_name = st.text_input("Test Name")
+        date = st.date_input("Test Date")
+        outcome = st.selectbox("Outcome", ["Passed", "Failed", "Pending"])
+        remarks = st.text_area("Remarks")
+        if st.form_submit_button("Log Test"):
+            st.session_state.test_logs.append({
+                "Test Name": test_name,
+                "Date": date.strftime("%Y-%m-%d"),
+                "Outcome": outcome,
+                "Remarks": remarks
+            })
+            st.success("Test logged.")
+
+    if st.session_state.test_logs:
+        df_tests = pd.DataFrame(st.session_state.test_logs)
+        st.dataframe(df_tests)
+elif menu == "🕒 Time Tracker":
+    st.subheader("🕒 Work Session Time Tracker")
+
+    if "start_time" not in st.session_state:
+        st.session_state.start_time = None
+        st.session_state.time_log = []
+
+    if st.button("▶️ Start Timer"):
+        st.session_state.start_time = datetime.datetime.now()
+        st.success("Timer started!")
+
+    if st.button("⏹️ Stop Timer") and st.session_state.start_time:
+        end_time = datetime.datetime.now()
+        duration = end_time - st.session_state.start_time
+        st.session_state.time_log.append({
+            "Start": st.session_state.start_time.strftime("%Y-%m-%d %H:%M:%S"),
+            "End": end_time.strftime("%Y-%m-%d %H:%M:%S"),
+            "Duration": str(duration)
+        })
+        st.session_state.start_time = None
+        st.success(f"Session logged: {duration}")
+
+    if st.session_state.time_log:
+        df_time = pd.DataFrame(st.session_state.time_log)
+        st.dataframe(df_time)
+elif menu == "🔍 Error Log Analyzer":
+    st.subheader("🔍 Log Analyzer")
+
+    log_file = st.file_uploader("Upload Error Log (.txt)", type=["txt"])
+    if log_file:
+        content = log_file.read().decode("utf-8")
+        st.text_area("Log Content", content, height=300)
+        import re
+        errors = re.findall(r"(?i)error:?.*", content)
+        st.markdown("### ⚠️ Extracted Errors")
+        for err in errors:
+            st.error(err)
+elif menu == "📡 Sensor Monitor":
+    st.subheader("📡 Real-Time Sensor Data Monitor (Simulated)")
+
+    st.markdown("📈 Simulated output for temperature, voltage, and RPM")
+
+    t = np.arange(0, 10, 0.1)
+    temp = 25 + 5*np.sin(t)
+    voltage = 12 + np.cos(t)
+    rpm = 1500 + 300*np.sin(2*t)
+
+    fig, ax = plt.subplots()
+    ax.plot(t, temp, label="Temp (°C)")
+    ax.plot(t, voltage, label="Voltage (V)")
+    ax.plot(t, rpm, label="RPM")
+    ax.set_title("Sensor Readings")
+    ax.legend()
+    st.pyplot(fig)
+elif menu == "🧰 Tool Scheduler":
+    st.subheader("🧰 Schedule Tool Usage")
+
+    if "tools" not in st.session_state:
+        st.session_state.tools = []
+
+    with st.form("tool_form"):
+        tool = st.text_input("Tool Name")
+        user = st.text_input("User")
+        date = st.date_input("Usage Date")
+        time = st.time_input("Usage Time")
+        schedule = st.form_submit_button("Schedule Tool")
+        if schedule:
+            st.session_state.tools.append({
+                "Tool": tool,
+                "User": user,
+                "Scheduled": f"{date} {time}"
+            })
+            st.success("Scheduled!")
+
+    if st.session_state.tools:
+        df_tool = pd.DataFrame(st.session_state.tools)
+        st.dataframe(df_tool)
+elif menu == "🎵📏 Sound metre pro":
+    st.subheader("🎵📏 Sound Level Simulation")
+
+    db_level = st.slider("🔊 Simulated Sound Level (dB)", 20, 120, 70)
+    if db_level > 85:
+        st.warning("⚠️ Dangerous sound level!")
+    elif db_level > 60:
+        st.info("👂 Moderate noise")
+    else:
+        st.success("🟢 Safe level")
+
+elif menu == "🎥🔧 Engineering videos":
+    st.subheader("🎥🔧 Watch Engineering Tutorials")
+
+    st.video("https://www.youtube.com/watch?v=W74y1RxN6BA&pp=ygUXbWVjaGFuaWNhbCBlbmdpbmVlcmluZyA%3D")
+    st.video("https://www.youtube.com/watch?v=dS4VU8KchWQ&pp=ygUWZWxlY3RyaWNhbCBlbmdpbmVlcmluZw%3D%3D")
+    st.video("https://www.youtube.com/watch?v=bFljMHTQ1QY&pp=ygURY2l2aWwgZW5naW5lZXJpbmc%3D")
 
 st.markdown("---")
 st.markdown("""
